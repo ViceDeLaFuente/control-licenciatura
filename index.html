@@ -3,12 +3,456 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Control Licenciatura</title>
+
+  <script src="https://unpkg.com/html5-qrcode"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+    }
+
+    .contenedor {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,.08);
+    }
+
+    h1 {
+      text-align: center;
+      margin-top: 0;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 15px;
+      margin-top: 10px;
+      font-size: 18px;
+      border-radius: 10px;
+    }
+
+    input {
+      border: 1px solid #ccc;
+    }
+
+    button {
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .btn-scan {
+      background: #198754;
+      color: white;
+    }
+
+    .btn-confirmar {
+      background: #0d6efd;
+      color: white;
+    }
+
+    .btn-nuevo {
+      background: #6c757d;
+      color: white;
+    }
+
+    #reader {
+      margin-top: 15px;
+    }
+
+    .resultado {
+      margin-top: 20px;
+      padding: 20px;
+      border-radius: 10px;
+      display: none;
+      text-align: center;
+    }
+
+    .ok {
+      background: #d1e7dd;
+      border: 2px solid #198754;
+    }
+
+    .error {
+      background: #f8d7da;
+      border: 2px solid #dc3545;
+    }
+
+    #alumno {
+      font-size: 26px;
+      margin-bottom: 5px;
+    }
+
+    #curso {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    #cupos {
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    #mensaje {
+      margin-top: 10px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+  </style>
 </head>
+
 <body>
 
-  <h1>Control Licenciatura</h1>
-  <p>Prueba GitHub Pages</p>
+<div class="contenedor">
+
+  <h1>🎓 Control de Acceso</h1>
+
+  <input
+    type="text"
+    id="dispositivo"
+    placeholder="Ej: Puerta 1">
+
+  <button
+    class="btn-scan"
+    onclick="iniciarEscaneo()">
+    📷 Escanear QR
+  </button>
+
+  <div id="reader"></div>
+
+  <div id="resultado" class="resultado">
+
+    <div id="alumno"></div>
+    <div id="curso"></div>
+    <div id="cupos"></div>
+    <div id="mensaje"></div>
+
+    <button
+      id="btnConfirmar"
+      class="btn-confirmar"
+      onclick="registrarIngreso()"
+      style="display:none;">
+      ✅ Confirmar ingreso
+    </button>
+
+    <button
+      id="btnNuevo"
+      class="btn-nuevo"
+      onclick="nuevoIngreso()"
+      style="display:none;">
+      🔄 Nuevo ingreso
+    </button>
+
+  </div>
+
+</div>
+
+<script>
+
+  const API = 'https://script.google.com/macros/s/AKfycbwVvPlSjRDkXCc7WKf3GnA7Mu4nu-5YPke5Qq_LU_2bjvihQAdvZ5amVlbbTjNQTfL1dg/exec';
+
+  let codigoActual = '';
+  let scanner = null;
+  let procesando = false;
+
+
+  function iniciarEscaneo() {
+
+    if (scanner) {
+      return;
+    }
+
+    procesando = false;
+
+    document.getElementById('resultado').style.display = 'none';
+    document.getElementById('reader').innerHTML = '';
+
+    scanner = new Html5Qrcode('reader');
+
+    scanner.start(
+      { facingMode: 'environment' },
+      {
+        fps: 10,
+        qrbox: 250
+      },
+      codigoDetectado
+    )
+    .catch(error => {
+      alert(
+        'No se pudo abrir la cámara: ' +
+        error
+      );
+
+      scanner = null;
+    });
+
+  }
+
+
+  async function codigoDetectado(codigo) {
+
+    if (procesando) {
+      return;
+    }
+
+    procesando = true;
+
+    codigoActual = String(codigo || '').trim();
+
+    try {
+
+      if (scanner) {
+        await scanner.stop();
+        scanner.clear();
+      }
+
+    } catch (e) {}
+
+    scanner = null;
+
+    buscarAlumno(codigoActual);
+  }
+
+
+  function buscarAlumno(codigo) {
+
+    const callback = 'cb_' + Date.now();
+
+    window[callback] = function(respuesta) {
+
+      delete window[callback];
+
+      const script = document.getElementById(
+        'script_' + callback
+      );
+
+      if (script) {
+        script.remove();
+      }
+
+      mostrarAlumno(respuesta);
+    };
+
+
+    const script = document.createElement('script');
+
+    script.id = 'script_' + callback;
+
+    script.src =
+      API +
+      '?accion=buscar' +
+      '&codigo=' +
+      encodeURIComponent(codigo) +
+      '&callback=' +
+      callback;
+
+    document.body.appendChild(script);
+  }
+
+
+  function mostrarAlumno(respuesta) {
+
+    const resultado =
+      document.getElementById('resultado');
+
+    resultado.style.display = 'block';
+
+    document.getElementById('btnNuevo')
+      .style.display = 'block';
+
+
+    if (!respuesta.ok) {
+
+      resultado.className =
+        'resultado error';
+
+      document.getElementById('alumno')
+        .innerText = '';
+
+      document.getElementById('curso')
+        .innerText = '';
+
+      document.getElementById('cupos')
+        .innerText = '';
+
+      document.getElementById('mensaje')
+        .innerText =
+        '⛔ ' + respuesta.mensaje;
+
+      document.getElementById('btnConfirmar')
+        .style.display = 'none';
+
+      return;
+    }
+
+
+    document.getElementById('alumno')
+      .innerText =
+      respuesta.alumno;
+
+    document.getElementById('curso')
+      .innerText =
+      respuesta.curso;
+
+    document.getElementById('cupos')
+      .innerText =
+      respuesta.ingresados +
+      ' de ' +
+      respuesta.cupos +
+      ' ingresos utilizados';
+
+
+    if (
+      respuesta.ingresados >=
+      respuesta.cupos
+    ) {
+
+      resultado.className =
+        'resultado error';
+
+      document.getElementById('mensaje')
+        .innerText =
+        '⛔ NO QUEDAN CUPOS';
+
+      document.getElementById('btnConfirmar')
+        .style.display = 'none';
+
+      return;
+    }
+
+
+    resultado.className =
+      'resultado ok';
+
+    document.getElementById('mensaje')
+      .innerText =
+      '✅ PUEDE INGRESAR';
+
+    document.getElementById('btnConfirmar')
+      .style.display = 'block';
+  }
+
+
+  function registrarIngreso() {
+
+    const dispositivo =
+      document.getElementById('dispositivo')
+        .value || 'Puerta';
+
+    const callback = 'cb_' + Date.now();
+
+    document.getElementById('btnConfirmar')
+      .disabled = true;
+
+    window[callback] = function(respuesta) {
+
+      delete window[callback];
+
+      const script = document.getElementById(
+        'script_' + callback
+      );
+
+      if (script) {
+        script.remove();
+      }
+
+      mostrarResultadoIngreso(respuesta);
+    };
+
+
+    const script =
+      document.createElement('script');
+
+    script.id =
+      'script_' + callback;
+
+    script.src =
+      API +
+      '?accion=registrar' +
+      '&codigo=' +
+      encodeURIComponent(codigoActual) +
+      '&dispositivo=' +
+      encodeURIComponent(dispositivo) +
+      '&callback=' +
+      callback;
+
+    document.body.appendChild(script);
+  }
+
+
+  function mostrarResultadoIngreso(respuesta) {
+
+    const resultado =
+      document.getElementById('resultado');
+
+    document.getElementById('btnConfirmar')
+      .disabled = false;
+
+
+    if (!respuesta.ok) {
+
+      resultado.className =
+        'resultado error';
+
+      document.getElementById('mensaje')
+        .innerText =
+        '⛔ ' + respuesta.mensaje;
+
+      document.getElementById('btnConfirmar')
+        .style.display = 'none';
+
+      return;
+    }
+
+
+    resultado.className =
+      'resultado ok';
+
+    document.getElementById('cupos')
+      .innerText =
+      respuesta.ingresados +
+      ' de ' +
+      respuesta.cupos +
+      ' ingresos utilizados';
+
+    document.getElementById('mensaje')
+      .innerText =
+      '✅ INGRESO REGISTRADO';
+
+    document.getElementById('btnConfirmar')
+      .style.display = 'none';
+
+    document.getElementById('btnNuevo')
+      .style.display = 'block';
+  }
+
+
+  function nuevoIngreso() {
+
+    codigoActual = '';
+    procesando = false;
+
+    document.getElementById('resultado')
+      .style.display = 'none';
+
+    document.getElementById('reader')
+      .innerHTML = '';
+
+    iniciarEscaneo();
+  }
+
+</script>
 
 </body>
 </html>
