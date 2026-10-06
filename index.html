@@ -7,117 +7,158 @@
   <title>Control Licenciatura</title>
 
   <script src="https://unpkg.com/html5-qrcode"></script>
-
   <style>
-    * {
-      box-sizing: border-box;
-    }
+  * {
+    box-sizing: border-box;
+  }
 
-    body {
-      margin: 0;
-      padding: 20px;
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-    }
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f3f5f4;
+    color: #1f2d24;
+  }
 
-    .contenedor {
-      max-width: 500px;
-      margin: auto;
-      background: white;
-      padding: 20px;
-      border-radius: 15px;
-      box-shadow: 0 4px 15px rgba(0,0,0,.08);
-    }
+  .encabezado {
+    background: #0b6b3a;
+    color: white;
+    padding: 22px 15px;
+    text-align: center;
+    border-bottom: 5px solid #d9e7df;
+  }
 
-    h1 {
-      text-align: center;
-      margin-top: 0;
-    }
+  .encabezado h1 {
+    margin: 0;
+    font-size: 26px;
+  }
 
-    input, button {
-      width: 100%;
-      padding: 15px;
-      margin-top: 10px;
-      font-size: 18px;
-      border-radius: 10px;
-    }
+  .encabezado p {
+    margin: 6px 0 0;
+    font-size: 16px;
+    opacity: 0.95;
+  }
 
-    input {
-      border: 1px solid #ccc;
-    }
+  .contenedor {
+    max-width: 500px;
+    margin: 25px auto;
+    background: white;
+    padding: 22px;
+    border-radius: 16px;
+    box-shadow: 0 6px 18px rgba(0,0,0,.08);
+  }
 
-    button {
-      border: none;
-      font-weight: bold;
-      cursor: pointer;
-    }
+  .titulo-seccion {
+    text-align: center;
+    margin-bottom: 18px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #0b6b3a;
+  }
 
-    .btn-scan {
-      background: #198754;
-      color: white;
-    }
+  input, button {
+    width: 100%;
+    padding: 15px;
+    margin-top: 10px;
+    font-size: 17px;
+    border-radius: 10px;
+  }
 
-    .btn-confirmar {
-      background: #0d6efd;
-      color: white;
-    }
+  input {
+    border: 1px solid #cfd8d3;
+    background: #fafafa;
+  }
 
-    .btn-nuevo {
-      background: #6c757d;
-      color: white;
-    }
+  button {
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+  }
 
-    #reader {
-      margin-top: 15px;
-    }
+  .btn-scan {
+    background: #0b6b3a;
+    color: white;
+  }
 
-    .resultado {
-      margin-top: 20px;
-      padding: 20px;
-      border-radius: 10px;
-      display: none;
-      text-align: center;
-    }
+  .btn-confirmar {
+    background: #16794a;
+    color: white;
+  }
 
-    .ok {
-      background: #d1e7dd;
-      border: 2px solid #198754;
-    }
+  .btn-nuevo {
+    background: #5b6860;
+    color: white;
+  }
 
-    .error {
-      background: #f8d7da;
-      border: 2px solid #dc3545;
-    }
+  .btn-scan:hover,
+  .btn-confirmar:hover {
+    filter: brightness(.95);
+  }
 
-    #alumno {
-      font-size: 26px;
-      margin-bottom: 5px;
-    }
+  #reader {
+    margin-top: 18px;
+    border-radius: 12px;
+    overflow: hidden;
+  }
 
-    #curso {
-      font-size: 18px;
-      margin-bottom: 10px;
-    }
+  .resultado {
+    margin-top: 20px;
+    padding: 22px;
+    border-radius: 12px;
+    display: none;
+    text-align: center;
+  }
 
-    #cupos {
-      font-size: 22px;
-      font-weight: bold;
-    }
+  .ok {
+    background: #e3f2e9;
+    border: 2px solid #0b6b3a;
+  }
 
-    #mensaje {
-      margin-top: 10px;
-      font-size: 20px;
-      font-weight: bold;
-    }
-  </style>
+  .error {
+    background: #fdeaea;
+    border: 2px solid #b63c3c;
+  }
+
+  #alumno {
+    font-size: 27px;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+
+  #curso {
+    font-size: 18px;
+    color: #4c5c52;
+    margin-bottom: 10px;
+  }
+
+  #cupos {
+    font-size: 24px;
+    font-weight: bold;
+    margin-top: 10px;
+  }
+
+  #mensaje {
+    margin-top: 12px;
+    font-size: 20px;
+    font-weight: bold;
+  }
+
+  .pie {
+    text-align: center;
+    color: #6d776f;
+    font-size: 13px;
+    padding: 15px;
+  }
+</style>
+  
 </head>
 
 <body>
-
+<div class="encabezado">
+  <h1>Liceo Abate Molina</h1>
+  <p>Licenciatura 2026 · Control de Acceso</p>
+</div>
 <div class="contenedor">
-
-  <h1>🎓 Control de Acceso</h1>
-
+  <div class="titulo-seccion">🎓 Ingreso de Invitados</div>
   <input
     type="text"
     id="dispositivo"
@@ -453,6 +494,8 @@
   }
 
 </script>
-
+<div class="pie">
+  Sistema de control de acceso · Licenciatura 2026
+</div>
 </body>
 </html>
